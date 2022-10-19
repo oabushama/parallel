@@ -30,7 +30,7 @@ struct Poisson2D
     for (int ix = 0; ix < Nx; ix++)
     {
       const double x  = ix*dx;
-      const double y  = ix*dx;
+      const double y  = iy*dx;
       const double r2 = (x-0.5*Lx)*(x-0.5*Lx)+(y-0.5*Ly)*(y-0.5*Ly);
       u    [iy*Nx+ix] = 0.0;
       u_old[iy*Nx+ix] = 0.0;
