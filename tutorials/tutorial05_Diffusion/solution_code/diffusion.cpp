@@ -83,10 +83,8 @@ struct Diffusion {
 #pragma omp parallel for reduction(min : min_c) reduction(max : max_c)
         for (size_t j = 1; j <= N; ++j) {
             double c0 = c[j];
-            if (c0 > max_c)
-                max_c = c0;
-            if (c0 < min_c)
-                min_c = c0;
+            max_c = std::max(max_c, c0);
+            min_c = std::min(min_c, c0);
         }
 
         const double epsilon = 1e-8;

@@ -79,8 +79,8 @@ struct Diffusion {
 
         /* Initialize max and min concentration */
         double max_c, min_c;
-        max_c = 0;
-        min_c = 0;
+        max_c = c[1];
+        min_c = c[1];
 
         // TODO: Find max and min concentration values
         //  > Note: what are the bounds of this for loop?
