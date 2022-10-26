@@ -5,7 +5,7 @@ EXTRA =
 LIBPATH=$(MKLROOT)/lib/intel64
 MKL_SERIAL_LINK=-Wl,--start-group  $(MKLROOT)/lib/intel64/libmkl_intel_lp64.a $(MKLROOT)/lib/intel64/libmkl_sequential.a $(MKLROOT)/lib/intel64/libmkl_core.a -Wl,--end-group -lpthread -lm
 
-targets = matrix_vector transpose  matrix_matrix
+targets = matrix_matrix
 
 all: $(targets)
 
