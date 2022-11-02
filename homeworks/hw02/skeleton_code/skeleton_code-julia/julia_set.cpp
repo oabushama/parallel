@@ -1,7 +1,3 @@
-// Skeleton code for HPCSE I (2018HS) Exam, 11.01.2019
-// Prof. P. Koumoutsakos
-// Coding 1: Julia Set
-
 #include <chrono>
 #include <cstdio>
 #include <omp.h>
@@ -16,7 +12,6 @@ constexpr int HEIGHT = 360 / 2;
 
 constexpr int MAX_ITERATIONS = 1000;
 short image[HEIGHT][WIDTH];
-
 
 /*
  * Generate the Julia set.
