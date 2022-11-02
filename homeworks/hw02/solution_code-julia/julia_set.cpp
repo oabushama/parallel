@@ -26,11 +26,9 @@ void julia_set(void) {
 
     auto t0 = std::chrono::steady_clock::now();
 
-    // To ensure load balancing, simply split the job into chunks. Considering
-    // the nature of the problem, `static` is enough (we split by pixel, not by
-    // row!). To ensure each thread uses full cache lines, use a chunk size of
-    // 32 or a multiple of it.
-#pragma omp parallel for collapse(2) schedule(static, 32)
+    // To ensure load balancing, simply split the job into chunks. 
+    // To ensure each thread uses full cache lines, use a chunk size of 32 or a multiple of it.
+#pragma omp parallel for collapse(2) schedule(dynamic, 32)
     for (int i = 0; i < HEIGHT; ++i)
     for (int j = 0; j < WIDTH; ++j) {
         // Compute `w = z_0 = x + i y` for the given pixel (j, i).
