@@ -11,7 +11,9 @@ constexpr int WIDTH = 640;
 constexpr int HEIGHT = 360 / 2;
 
 constexpr int MAX_ITERATIONS = 1000;
-short image[HEIGHT][WIDTH];
+// Required to ensure that threads don't share cache lines.
+// alignas, posix_memalign, aligned_allocator or anything else is fine.
+alignas(64) short image[HEIGHT][WIDTH];
 
 /*
  * Generate the Julia set.
@@ -24,7 +26,11 @@ void julia_set(void) {
 
     auto t0 = std::chrono::steady_clock::now();
 
-    // TODO: Parallelize.
+    // To ensure load balancing, simply split the job into chunks. Considering
+    // the nature of the problem, `static` is enough (we split by pixel, not by
+    // row!). To ensure each thread uses full cache lines, use a chunk size of
+    // 32 or a multiple of it.
+#pragma omp parallel for collapse(2) schedule(static, 32)
     for (int i = 0; i < HEIGHT; ++i)
     for (int j = 0; j < WIDTH; ++j) {
         // Compute `w = z_0 = x + i y` for the given pixel (j, i).
@@ -57,11 +63,42 @@ void julia_set(void) {
 std::vector<int> compute_histogram(void) {
     std::vector<int> result(MAX_ITERATIONS + 1);
 
-    // TODO: Compute the histogram of iteration count.
-    //       Parallelize with OpenMP.
-    //
-    //       To check your result, you can run `make plot`
-    //       to plot the computed histogram (not mandatory).
+#pragma omp parallel
+    {
+        // Create a local histogram.
+        std::vector<int> local(MAX_ITERATIONS + 1);
+#pragma omp for
+        for (int i = 0; i < HEIGHT; ++i)
+        for (int j = 0; j < WIDTH; ++j)
+            ++local[image[i][j]];
+
+        // And reduce to the global histogram in a critial region.
+#pragma omp critical
+        for (int i = 0; i < (int)local.size(); ++i)
+            result[i] += local[i];
+    }
+
+    /* ALTERNATIVE SOLUTION:
+
+    int tn = omp_get_max_threads();
+#pragma omp parallel
+    {
+        // Manually split the job.
+        int tid = omp_get_thread_num();
+        int begin = HEIGHT * WIDTH * tid / tn;
+        int end = HEIGHT * WIDTH * (tid + 1) / tn;
+
+        // Create a local histogram.
+        std::vector<int> local(MAX_ITERATIONS + 1);
+        for (int i = begin; i < end; ++i)
+            ++local[((short *)image)[i]];
+
+        // And update the global histogram in a critial region.
+#pragma omp critical
+        for (int i = 0; i < (int)local.size(); ++i)
+            result[i] += local[i];
+    }
+    */
 
     return result;
 }
