@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -O3 -Wall -Wextra -pedantic -std=c++14 -fopenmp
 
-all: diffusion
+all: diffusion diffusion_naive
 
 diffusion: diffusion.cpp
 	$(CXX) $< $(CXXFLAGS) -o $@
@@ -20,7 +20,7 @@ stats: diffusion
 
 
 clean:
-	rm -rf diffusion lsf*
+	rm -rf diffusion diffusion_naive lsf*
 
 .PHONY: all clean
 .SUFFIXES:
