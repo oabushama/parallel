@@ -1,7 +1,3 @@
-
-// #include "network/Network.h"
-// #include "network/Optimizer.h"
-
 #include <chrono>
 #include <random>
 #include <algorithm>
