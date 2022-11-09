@@ -210,11 +210,11 @@ namespace utils{
         // (e.g. calculation of the mean)
 
         // TODO:
-        for(int d)
-        for(int n)
-        data_T[d*N+n] = 
-
-
+        for (int d = 0; d < D; ++d) {
+            for (int n = 0; n < N; ++n) {
+                data_T[d*N + n] = data[n*D + d];
+            }
+        }
         // :TODO
     }
 
@@ -224,9 +224,14 @@ namespace utils{
         // data(n,d)=data_T[d*N+n]
 
         // TODO:
-
-
-
+        #pragma omp parallel for
+        for (int d = 0; d < D; ++d) {
+            mean[d] = 0.0;
+            for (int n = 0; n < N; ++n) {
+                mean[d] += data_T[d*N + n];
+            }
+            mean[d] /= N;
+        }
         // :TODO
     }
 
@@ -236,12 +241,14 @@ namespace utils{
         // data(n,d)=data_T[d*N+n]
 
         // TODO:
-
-
-
-
-
-
+        for (int d = 0; d < D; ++d) {
+            std[d] = 0.0;
+            for (int n = 0; n < N; ++n) {
+                double temp = data_T[d*N + n] - mean[d];
+                std[d] += temp*temp;
+            }
+            std[d] = std::sqrt(std[d] / (N-1));
+        }
         // :TODO
     }
 
@@ -254,11 +261,12 @@ namespace utils{
         // data(n,d)=data_T[d*N+n]
 
         // TODO:
-
-
-
-
-
+        #pragma omp parallel for
+        for (int d = 0; d < D; ++d) {
+            for (int n = 0; n < N; ++n) {
+                data_T[d*N + n] = (data_T[d*N + n] - mean[d]) / std[d];
+            }
+        }
         // :TODO
     }
 
@@ -269,11 +277,12 @@ namespace utils{
         // data(n,d)=data_T[d*N + n]
 
         // TODO:
-
-
-
-
-
+        #pragma omp parallel for
+        for (int d = 0; d < D; ++d) {
+            for (int n = 0; n < N; ++n) {
+                data_T[d*N + n] = data_T[d*N + n] - mean[d];
+            }
+        }
         // :TODO
     }
 
@@ -313,21 +322,23 @@ namespace utils{
         // C(j,k)=C[j*D+k]
 
         // TODO:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        #pragma omp parallel for schedule(dynamic,4)
+        for (int j = 0; j < D; ++j) // rows of COV (loop over dimension)
+        {
+            for (int k=0; k<=j; ++k) // columns of COV (loop over dimension)
+            {
+                // Calculation of element C(j,k) of the covariance matrix
+                double cov = 0.0;
+                // C(j,k) is the mean inner product of data(:,j) and data(:,k)
+                for(int i=0; i<N; ++i) // loop over all samples
+                {
+                    // data(:,j) =data_T[j*N+:]
+                    // data(:,k) =data_T[k*N+:]
+                    cov += data_T[j*N + i] * data_T[k*N + i];
+                }
+                C[j*D+k] = cov / (N-1.0); // store upper triangular part
+            }
+        }
         // :TODO
     }
 
@@ -339,11 +350,12 @@ namespace utils{
         // V(k,d)=V[k*D+d] # ROW MAJOR
 
         // TODO:
-
-
-
-
-
+        #pragma omp parallel for
+        for (int k = 0; k < NC; ++k) {
+            for (int d = 0; d < D; ++d) {
+                V[k*D + d] = C[(D-1-k)*D+d];
+            }
+        }
         // TODO
     }
 
@@ -376,17 +388,19 @@ namespace utils{
         // data_rec(n,d)=data_rec[d + n*D]          # ROW MAJOR
 
         // TODO:
-
-
-
-
-
-
-
-
-
-
-
+        #pragma omp parallel for
+        for (int n = 0; n < N; ++n) // Iterate through all data
+        {
+            for (int d = 0; d < D; ++d) // Iterate through all dimensions
+            {
+                double sum = 0.0;
+                for (int c = 0; c < NC; ++c) // Iterate through components
+                {
+                    sum += V[c*D + d] * data_red[n*NC + c];
+                }
+                data_rec[n*D + d] = sum;
+            }
+        }
         // :TODO
     }
 
