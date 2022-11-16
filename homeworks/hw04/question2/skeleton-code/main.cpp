@@ -33,7 +33,7 @@ unsigned overlapMC(const double x2, const double R1, const double R2, size_t n, 
 int main(int argc, char *argv[])
 {
 	// TODO_b: Start-up the MPI environment and determine this process' rank ID as
-    // well as the total number of processes (=ranks) involved in the
+    // well as the total number of processes (=procs) involved in the
     // communicator
     int rank, procs = -1;
 
