@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 
 def phi_r_samples(n, radius):
     phi = np.random.uniform(0, 2*np.pi, size=n)
-    r = np.random.uniform(0, radius, size=n)
+    r = np.random.uniform(0, radius**2, size=n)
+
+    r = np.sqrt(r)
 
     x = r*np.cos(phi)
     y = r*np.sin(phi)
@@ -24,9 +26,9 @@ def main():
     n = 10000
     radius = 5
 
-    #x, y = phi_r_samples(n, radius)
+    x, y = phi_r_samples(n, radius)
 
-    x, y = reject_samples(n, radius)
+    #x, y = reject_samples(n, radius)
 
 
     plt.plot(x, y, '.')
@@ -38,8 +40,10 @@ def main():
     ax = plt.gca()
     ax.add_patch(plt.Circle((0,0), radius, fill=False))
 
-    plt.show()
-    #plt.savefig("circle_plot.png")
+    ax.axis('equal')
+
+    #plt.show()
+    plt.savefig("circle_plot.png")
 
 
 if __name__ == "__main__":
