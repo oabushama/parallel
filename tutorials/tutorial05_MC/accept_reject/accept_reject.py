@@ -20,8 +20,8 @@ def main():
     ax1.plot(x, f(x))
     ax2.plot(x, f(x))
 
-    plt.savefig("accept_reject.png")
-    return
+    #plt.savefig("accept_reject.png")
+    #return
 
     ###############################
     # Accept-reject using uniform distr
@@ -36,26 +36,26 @@ def main():
     b[-1] = 0.001
     ax1.plot(a, b)
 
-    plt.savefig("accept_reject.png")
-    return
+    #plt.savefig("accept_reject.png")
+    #return
 
-    n = int(1e3) #number of random samples
+    n = int(1e6) #number of random samples
 
     x = np.random.uniform(-3, 3, size=n)
     u = np.random.uniform(size=n)
 
     ax1.plot(x, u*f_max, '.')
 
-    plt.savefig("accept_reject.png")
-    return
+    #plt.savefig("accept_reject.png")
+    #return
 
     u_inside = u[u < f(x)/f_max]
     x_inside = x[u < f(x)/f_max]
 
     ax1.plot(x_inside, u_inside*f_max, 'r.')
 
-    plt.savefig("accept_reject.png")
-    return
+    #plt.savefig("accept_reject.png")
+    #return
 
 
     accepted = u_inside.shape[0]/n
@@ -67,8 +67,8 @@ def main():
     print("area: ", area)
     print()
 
-    plt.savefig("accept_reject.png")
-    return
+    #plt.savefig("accept_reject.png")
+    #return
 
     ###############################
     #lets do accept-reject sampling
@@ -79,8 +79,8 @@ def main():
     h_ = lambda_*h(u)
     ax2.plot(a, h(a)*lambda_)
 
-    plt.savefig("accept_reject.png")
-    return
+    #plt.savefig("accept_reject.png")
+    #return
 
     x = np.random.normal(size=n)                    # x ~ N(0,1)
     u = np.random.uniform(size=n)
@@ -93,21 +93,21 @@ def main():
 
     ax2.plot(x, u*lambda_*h(x), '.')
 
-    plt.savefig("accept_reject.png")
-    return
+    #plt.savefig("accept_reject.png")
+    #return
 
     u_inside = u[u < f(x)/(lambda_*h(x))]
     x_inside   = x[u < f(x)/(lambda_*h(x))]
 
     ax2.plot(x_inside, u_inside*lambda_*h(x_inside), 'r.')
 
-    plt.savefig("accept_reject.png")
-    return
+    #plt.savefig("accept_reject.png")
+    #return
     
     u_accepted = u_inside.shape[0]/n
     sampling_area = -scipy.special.erf(-3.0/(sigma*np.sqrt(2)))
     sampling_area *= lambda_
-    area = h_accepted*sampling_area
+    area = u_accepted*sampling_area
 
     print("accpetance rate: ", u_accepted)
     print("sampling_area: ", sampling_area)
