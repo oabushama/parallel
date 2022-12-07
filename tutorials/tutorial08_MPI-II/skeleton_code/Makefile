@@ -1,6 +1,3 @@
-# Skeleton code for HPCSE I (2019HS) Exam, 03.02.2020
-# Prof. P. Koumoutsakos
-# Coding 1: Particles MPI
 CXX = mpic++
 CXXFLAGS = -std=c++11 -Wall -Wextra
 
