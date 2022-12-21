@@ -62,15 +62,17 @@ public:
 
         /*
          TODO: Subquestion 3(c):
-               Paralelize this function with OpenMP
+               Paralelize the computations in this
+               function with OpenMP
         */
 
 
         // ADI Step 1:
         // The following loops update the elements of rhs_
         // based on values of rho_
-        for (int iy=1; iy<real_N_-1; iy++) //rows
-        for (int ix=1; ix<real_N_-1; ix++) //columns
+        //
+        for (int iy=1; iy<real_N_-1; iy++)
+        for (int ix=1; ix<real_N_-1; ix++)
         {
             int k  =  iy    * real_N_ + ix;
             int k1 = (iy-1) * real_N_ + ix;
@@ -80,7 +82,8 @@ public:
 
         // The following function is thread-safe and 
         // updates the values of rho_
-        for (int iy=1; iy<real_N_-1; iy++) //rows
+        //
+        for (int iy=1; iy<real_N_-1; iy++)
             thomas(0, iy);
 
 
@@ -88,8 +91,9 @@ public:
         // ADI Step 2:
         // The following loops update the elements of rhs_
         // based on values of rho_
-        for (int iy=1; iy<real_N_-1; iy++) //rows
-        for (int ix=1; ix<real_N_-1; ix++) //columns
+        // 
+        for (int iy=1; iy<real_N_-1; iy++)
+        for (int ix=1; ix<real_N_-1; ix++)
         {
             int k  = iy * real_N_ + ix;
             int k1 = iy * real_N_ + (ix-1);
@@ -99,7 +103,8 @@ public:
 
         // The following function is thread-safe and 
         // updates the values of rho_
-        for (int ix=1; ix<real_N_-1; ix++) //columns
+        //
+        for (int ix=1; ix<real_N_-1; ix++)
             thomas(1, ix);
     }
 
@@ -114,6 +119,7 @@ public:
         */
 
         double heat = 0.0;
+
         for (int i = 1; i < real_N_-1; ++i)
         for (int j = 1; j < real_N_-1; ++j)
             heat += dr_ * dr_ * rho_[i * real_N_ + j];
@@ -180,15 +186,17 @@ private:
 
     void initialize_rho()
     {
+
         /*
          TODO: Subquestion 3(b):
-               Paralelize this function with OpenMP
+               Paralelize the computations in
+               this function with OpenMP
         */
 
         double bound = 0.25 * L_;
 
-        for (int i = 1; i < real_N_-1; ++i) //rows
-        for (int j = 1; j < real_N_-1; ++j) //columns
+        for (int i = 1; i < real_N_-1; ++i)
+        for (int j = 1; j < real_N_-1; ++j)
         {
             int k = i*real_N_ + j;
             if (std::abs((i-1)*dr_ - L_/2.) < bound && std::abs((j-1)*dr_ - L_/2.) < bound) 
@@ -215,9 +223,9 @@ private:
 int main(int argc, char* argv[])
 {
 
-#pragma omp parallel
+    #pragma omp parallel
     {
-#pragma omp master
+        #pragma omp master
         std::cout << "Running with " << omp_get_num_threads() << " threads\n";
     }
 

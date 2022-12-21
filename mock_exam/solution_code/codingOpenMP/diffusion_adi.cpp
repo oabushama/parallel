@@ -59,33 +59,52 @@ public:
 
     void advance()
     {
-        // ADI Step 1: Solve a tridiagonal system for each row
+
+        /*
+         TODO: Subquestion 3(c):
+               Paralelize the computations in this
+               function with OpenMP
+        */
+
+
+        // ADI Step 1:
+        // The following loops update the elements of rhs_
+        // based on values of rho_
         #pragma omp parallel for
-        for (int iy=1; iy<real_N_-1; iy++) //rows
-        for (int ix=1; ix<real_N_-1; ix++) //columns
+        for (int iy=1; iy<real_N_-1; iy++)
+        for (int ix=1; ix<real_N_-1; ix++)
         {
             int k  =  iy    * real_N_ + ix;
             int k1 = (iy-1) * real_N_ + ix;
             int k2 = (iy+1) * real_N_ + ix;
             rhs_[k] = rho_[k] + R_ * (rho_[k1] - 2.*rho_[k] + rho_[k2]);
         }
+
+        // The following function is thread-safe and 
+        // updates the values of rho_
         #pragma omp parallel for
-        for (int iy=1; iy<real_N_-1; iy++) //rows
+        for (int iy=1; iy<real_N_-1; iy++)
             thomas(0, iy);
 
 
-        // ADI Step 2: Solve a tridiagonal system for each column
+
+        // ADI Step 2:
+        // The following loops update the elements of rhs_
+        // based on values of rho_
         #pragma omp parallel for
-        for (int iy=1; iy<real_N_-1; iy++) //rows
-        for (int ix=1; ix<real_N_-1; ix++) //columns
+        for (int iy=1; iy<real_N_-1; iy++)
+        for (int ix=1; ix<real_N_-1; ix++)
         {
             int k  = iy * real_N_ + ix;
             int k1 = iy * real_N_ + (ix-1);
             int k2 = iy * real_N_ + (ix+1);
             rhs_[k] = rho_[k] + R_ * (rho_[k1] - 2.*rho_[k] + rho_[k2]);
         }
+
+        // The following function is thread-safe and 
+        // updates the values of rho_
         #pragma omp parallel for
-        for (int ix=1; ix<real_N_-1; ix++) //columns
+        for (int ix=1; ix<real_N_-1; ix++)
             thomas(1, ix);
     }
 
@@ -93,6 +112,12 @@ public:
 
     void compute_diagnostics(const double t, const int step)
     {
+
+        /*
+         TODO: Subquestion 3(d):
+               Paralelize the computation of "heat" with OpenMP
+        */
+
         double heat = 0.0;
         #pragma omp parallel for reduction(+:heat)
         for (int i = 1; i < real_N_-1; ++i)
@@ -129,12 +154,11 @@ private:
 
     void thomas(const int dir, const int nid)
     {
-        std::vector<double> d_(N_);  // right hand side
-        std::vector<double> cp_(N_); // c prime
-        std::vector<double> dp_(N_); // d prime
+        std::vector<double> d_(N_);
+        std::vector<double> cp_(N_);
+        std::vector<double> dp_(N_);
         int i, k, k1;
 
-        // compute modified coefficients
         d_[0] = dir==0 ? rhs_[nid*real_N_] : rhs_[nid];
         cp_[0] = c_[0]/b_[0];
         dp_[0] = d_[0]/b_[0];
@@ -149,7 +173,6 @@ private:
         k = global(dir, nid, i+1);
         dp_[i] = (d_[i] - a_[i]*dp_[i-1]) / (b_[i] - a_[i] * cp_[i-1]);
 
-        // back substitution phase
         k = global(dir, nid, real_N_-2);
         rho_[k] = dp_[N_-1];
         for (int i=N_-2; i>=0; i--) {
@@ -163,14 +186,17 @@ private:
 
     void initialize_rho()
     {
-
-        /* Initialize rho(x, y, t=0) */
+        /*
+         TODO: Subquestion 3(b):
+               Paralelize the computations in
+               this function with OpenMP
+        */
 
         double bound = 0.25 * L_;
 
         #pragma omp parallel for
-        for (int i = 1; i < real_N_-1; ++i) //rows
-        for (int j = 1; j < real_N_-1; ++j) //columns
+        for (int i = 1; i < real_N_-1; ++i)
+        for (int j = 1; j < real_N_-1; ++j)
         {
             int k = i*real_N_ + j;
             if (std::abs((i-1)*dr_ - L_/2.) < bound && std::abs((j-1)*dr_ - L_/2.) < bound) 
@@ -196,21 +222,17 @@ private:
 
 int main(int argc, char* argv[])
 {
-    if (argc < 5) {
-        std::cerr << "Usage: " << argv[0] << " D L N dt\n";
-        return 1;
-    }
 
-#pragma omp parallel
+    #pragma omp parallel
     {
-#pragma omp master
+        #pragma omp master
         std::cout << "Running with " << omp_get_num_threads() << " threads\n";
     }
 
-    const double D = std::stod(argv[1]);  //diffusion constant
-    const double L = std::stod(argv[2]);  //domain side size
-    const int N = std::stoul(argv[3]);    //number of grid points per dimension
-    const double dt = std::stod(argv[4]); //timestep
+    const double D = 1;  //diffusion constant
+    const double L = 1;  //domain side size
+    const int N = 100;    //number of grid points per dimension
+    const double dt = 1.e-4; //timestep
 
     Diffusion2D system(D, L, N, dt, 0);
 
